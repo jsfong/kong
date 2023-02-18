@@ -6,18 +6,17 @@ helm repo add kong https://charts.konghq.com
 helm repo update
 helm install kong -n kong kong/kong -f values.yaml
 
-### Setup kong db for konga to use
-//Portforward DB
-//Create user konga and DB konga
+### Install db for konga
+helm install konga-db -n kong bitnami/postgresql -f values.yam
 
 ### Install konga
 helm install konga ./ -n kong -f values.yaml
 
-
 ### Connect to konga
-use http://<cluster ip>:8001
+use http://<kong admin cluster ip>:8001
 
 ### Other
 //Password change
 Remember to delete PVC after helm uninstall
 
+//Turning on DB cause KIC not working
