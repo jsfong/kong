@@ -13,19 +13,19 @@ image:
   # pullSecrets:
   #   - regcred
 
-nameOverride: ""
-fullnameOverride: ""
+# nameOverride: ""
+# fullnameOverride: ""
 
 service:
   type: ClusterIP
-  port: 80
+  port: 1337
 
 # Konga default configuration
 config:
   port: 1337
   node_env: development
   db_adapter: postgres
-  db_host: kong-postgresql
+  db_host: konga-db-postgresql
   db_port: 5432
   db_user: konga
   db_password: konga

@@ -1,36 +1,36 @@
-env:
-  database: "postgres"
-  pg_host: kong-postgresql
-  pg_port: 5432
-  pg_timeout: 5000
-  pg_user: kong
-  pg_password: kong
-  pg_database: kong
-  nginx_worker_processes: "1"
-  proxy_access_log: /dev/stdout
-  admin_access_log: /dev/stdout
-  admin_gui_access_log: /dev/stdout
-  portal_api_access_log: /dev/stdout
-  proxy_error_log: /dev/stderr
-  admin_error_log: /dev/stderr
-  admin_gui_error_log: /dev/stderr
-  portal_api_error_log: /dev/stderr
-  prefix: /kong_prefix/
+# env:
+#   database: "postgres"
+#   pg_host: kong-postgresql
+#   pg_port: 5432
+#   pg_timeout: 5000
+#   pg_user: kong
+#   pg_password: kong
+#   pg_database: kong
+#   nginx_worker_processes: "1"
+#   proxy_access_log: /dev/stdout
+#   admin_access_log: /dev/stdout
+#   admin_gui_access_log: /dev/stdout
+#   portal_api_access_log: /dev/stdout
+#   proxy_error_log: /dev/stderr
+#   admin_error_log: /dev/stderr
+#   admin_gui_error_log: /dev/stderr
+#   portal_api_error_log: /dev/stderr
+#   prefix: /kong_prefix/
 
-postgresql:
-  enabled: true
-  auth:
-    username: kong
-    database: kong
-    password: kong
-    postgresPassword: postgres
-  image:
-    # use postgres < 14 until is https://github.com/Kong/kong/issues/8533 resolved and released
-    # enterprise (kong-gateway) supports postgres 14
-    tag: 11.19.0-debian-11-r2
+# postgresql:
+#   enabled: true
+#   auth:
+#     username: kong
+#     database: kong
+#     password: kong
+#     postgresPassword: postgres
+#   image:
+#     # use postgres < 14 until is https://github.com/Kong/kong/issues/8533 resolved and released
+#     # enterprise (kong-gateway) supports postgres 14
+#     tag: 11.19.0-debian-11-r2
 
 enterprise:
-  enabled: true
+  enabled: false
 
 image:
   repository: kong/kong-gateway
