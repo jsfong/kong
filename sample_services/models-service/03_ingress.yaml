@@ -8,6 +8,7 @@ metadata:
     kubernetes.io/ingress.class: kong
     # konghq.com/plugins: rate-free-tier
 spec:
+  ingressClassName: kong
   rules:
     - http:
         paths:
