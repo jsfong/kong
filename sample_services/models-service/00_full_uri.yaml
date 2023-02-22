@@ -1,7 +1,7 @@
 # 
 # Load balance Algo: Consistent Hashing
-# Hash On: header
-# Header: x-model-id
+# Hash On: URI
+# Path: models-service/models/<Model id UUID>
 # 
 apiVersion: apps/v1
 kind: Deployment
@@ -74,7 +74,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /models
+          - path: /models-service/models/(?<model_id>[a-z0-9-]+)
             pathType: Prefix
             backend:
               service:
@@ -87,7 +87,7 @@ kind: KongIngress
 metadata:
   name: sample-customization
 upstream:
-  hash_on: header
-  hash_on_header: x-model-id
+  hash_on: uri_capture
+  hash_on_uri_capture: model_id
   hash_fallback: ip
   algorithm: consistent-hashing

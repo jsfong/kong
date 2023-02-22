@@ -5,12 +5,14 @@ kubectl create namespace kong
 helm repo add kong https://charts.konghq.com
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo update
-helm install kong -n kong kong/kong -f values.yaml
+helm install kong -n kong kong/kong -f with_db_value.yaml
 
 ### Install db for konga
-helm install konga-db -n kong bitnami/postgresql -f values.yam
+cd /konga/db
+helm install konga-db -n kong bitnami/postgresql -f values.yaml
 
 ### Install konga
+cd /konga
 helm install konga ./ -n kong -f values.yaml
 
 ### Connect to konga
@@ -18,13 +20,8 @@ use http://<kong admin cluster ip>:8001
 
 ## Deploy servce
 ### Deploy sample service
-kubectl apply -f 01_deployment.yaml
-kubectl apply -f 02_service.yaml
-kubectl apply -f 03_ingress.yaml
-
-### Update default lb to consistent hashing
-kubectl apply -f 04_kong_ingress.yaml
-kubectl patch service models-service --patch-file 05_patch_service.yaml
+cd /sample_services/models-service
+kubectl apply -f 00_full_uri.yaml
 
 ### Other
 //Password change
