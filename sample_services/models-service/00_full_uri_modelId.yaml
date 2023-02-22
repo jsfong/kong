@@ -74,8 +74,29 @@ spec:
   rules:
     - http:
         paths:
-          - path: /models-service/models/(?<model_id>[a-z0-9-]+)
+          - path: /models/(?<model_id>[a-z0-9-]+)
             pathType: Prefix
+            backend:
+              service:
+                name: models-service
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: models-ingress-exact
+  annotations:
+    # konghq.com/strip-path: "true"
+    kubernetes.io/ingress.class: kong
+    konghq.com/plugins: model-id-generator
+    # konghq.com/plugins: rate-free-tier
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /models
+            pathType: Exact
             backend:
               service:
                 name: models-service
@@ -91,3 +112,13 @@ upstream:
   hash_on_uri_capture: model_id
   hash_fallback: ip
   algorithm: consistent-hashing
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: model-id-generator
+config: 
+  header_name: model-id
+  generator: uuid#counter
+  echo_downstream: true
+plugin: correlation-id
