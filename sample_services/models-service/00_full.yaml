@@ -1,8 +1,8 @@
 # 
 # Load balance Algo: Consistent Hashing
-# Hash On: header
-# Header: x-model-id
+# Hash On: header "x-model-id"
 # 
+# Deploy demo service pods
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,21 +27,24 @@ spec:
         app.kubernetes.io/name: models-service
     spec:
       containers:
-        - env:
+        - name: models-service
+          image: demo:latest
+          imagePullPolicy: IfNotPresent          
+          env:
             - name: KUBERNETES_NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: QUOTE_SERVICE
-              value: models
-          image: demo:latest
-          imagePullPolicy: IfNotPresent
-          name: models-service
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           ports:
             - containerPort: 8080
               name: web
               protocol: TCP
 ---
+# Expose demo service pods as service
 apiVersion: v1
 kind: Service
 metadata:
@@ -62,19 +65,21 @@ spec:
     app.kubernetes.io/version: 0.0.2
   type: ClusterIP
 ---
+# Create a route for path with /models/<modelId>
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: models-ingress
   annotations:
-    konghq.com/strip-path: "true"
+    # konghq.com/strip-path: "true"
     kubernetes.io/ingress.class: kong
+    konghq.com/plugins: model-id-transformer
     # konghq.com/plugins: rate-free-tier
 spec:
   rules:
     - http:
         paths:
-          - path: /models
+          - path: /models/(?<model_id>[a-z0-9-]+)
             pathType: Prefix
             backend:
               service:
@@ -82,6 +87,29 @@ spec:
                 port:
                   number: 80
 ---
+# Create a route for path with /models
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: models-ingress-exact
+  annotations:
+    # konghq.com/strip-path: "true"
+    kubernetes.io/ingress.class: kong
+    konghq.com/plugins: model-id-generator
+    # konghq.com/plugins: rate-free-tier
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /models
+            pathType: Exact
+            backend:
+              service:
+                name: models-service
+                port:
+                  number: 80
+---
+# Create KongIngress for load balancing
 apiVersion: configuration.konghq.com/v1
 kind: KongIngress
 metadata:
@@ -91,3 +119,25 @@ upstream:
   hash_on_header: x-model-id
   hash_fallback: ip
   algorithm: consistent-hashing
+---
+# Create plugin to auto generate UUID on x-model-id header
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: model-id-generator
+config: 
+  header_name: x-model-id
+  generator: uuid
+  echo_downstream: true
+plugin: correlation-id
+---
+# Create plugin to copy model from uri to x-model-id header
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: model-id-transformer
+config:  
+  add:
+    headers:
+    - x-model-id:$(uri_captures.model_id)
+plugin: request-transformer
