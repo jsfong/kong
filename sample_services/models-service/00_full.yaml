@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: models-service
-          image: demo:latest
+          image: jsfong/demo_model_service:latest
           imagePullPolicy: IfNotPresent          
           env:
             - name: KUBERNETES_NAMESPACE
